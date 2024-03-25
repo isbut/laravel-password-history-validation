@@ -15,9 +15,10 @@ class CreatePasswordHistoryTable extends Migration
     {
         Schema::create(config('password-history.table'), function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('user_id');
+            $table->bigInteger('user_id')->nullable()->unsigned();
             $table->string('password');
             $table->timestamps();
+						$table->index(['user_id'], 'main_index');
         });
     }
 
