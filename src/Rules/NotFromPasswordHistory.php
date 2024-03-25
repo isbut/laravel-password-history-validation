@@ -5,12 +5,11 @@ namespace Infinitypaul\LaravelPasswordHistoryValidation\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Infinitypaul\LaravelPasswordHistoryValidation\Models\PasswordHistoryRepo;
-use Illuminate\Http\Request;
 use App\User;
 
 class NotFromPasswordHistory implements Rule
 {
-    protected $request;
+    protected $email;
     protected $checkPrevious;
 
     /**
@@ -18,9 +17,9 @@ class NotFromPasswordHistory implements Rule
      *
      * @param $user
      */
-    public function __construct($request)
+    public function __construct($email)
     {
-        $this->request = $request;
+        $this->email = $email;
         $this->checkPrevious = config('password-history.keep');
     }
 
@@ -29,17 +28,14 @@ class NotFromPasswordHistory implements Rule
      */
     public function passes($attribute, $value)
     {
-			if ($this->request->exists('email')) {
-				$user = User::where('email', $this->request->email)->first();
-				if ($user) {
-					$passwordHistories = PasswordHistoryRepo::fetchUser($user, $this->checkPrevious);
-					foreach ($passwordHistories as $passwordHistory) {
-						if (Hash::check($value, $passwordHistory->password)) {
-							return false;
-						}
+			
+			$user = User::where('email', $this->email)->first();
+			if ($user) {
+				$passwordHistories = PasswordHistoryRepo::fetchUser($user, $this->checkPrevious);
+				foreach ($passwordHistories as $passwordHistory) {
+					if (Hash::check($value, $passwordHistory->password)) {
+						return false;
 					}
-				} else {
-					return false;
 				}
 			} else {
 				return false;
