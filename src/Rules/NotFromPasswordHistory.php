@@ -5,10 +5,12 @@ namespace Infinitypaul\LaravelPasswordHistoryValidation\Rules;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 use Infinitypaul\LaravelPasswordHistoryValidation\Models\PasswordHistoryRepo;
+use Illuminate\Http\Request;
+use App\User;
 
 class NotFromPasswordHistory implements Rule
 {
-    protected $user;
+    protected $request;
     protected $checkPrevious;
 
     /**
@@ -16,9 +18,9 @@ class NotFromPasswordHistory implements Rule
      *
      * @param $user
      */
-    public function __construct($user)
+    public function __construct($request)
     {
-        $this->user = $user;
+        $this->request = $request;
         $this->checkPrevious = config('password-history.keep');
     }
 
@@ -27,14 +29,23 @@ class NotFromPasswordHistory implements Rule
      */
     public function passes($attribute, $value)
     {
-        $passwordHistories = PasswordHistoryRepo::fetchUser($this->user, $this->checkPrevious);
-        foreach ($passwordHistories as $passwordHistory) {
-            if (Hash::check($value, $passwordHistory->password)) {
-                return false;
-            }
-        }
+			if ($this->request->exists('email')) {
+				$user = User::where('email', $this->request->email)->first();
+				if ($user) {
+					$passwordHistories = PasswordHistoryRepo::fetchUser($user, $this->checkPrevious);
+					foreach ($passwordHistories as $passwordHistory) {
+						if (Hash::check($value, $passwordHistory->password)) {
+							return false;
+						}
+					}
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
 
-        return true;
+			return true;
     }
 
     /**
@@ -42,6 +53,6 @@ class NotFromPasswordHistory implements Rule
      */
     public function message()
     {
-        return __('auth.password_history') == 'auth.password_history' ? 'The Password Has Been Used' : __('auth.password_history');
+			return __('passwords.history') == 'passwords.history' ? 'The Password Has Been Used' : __('passwords.history');
     }
 }
