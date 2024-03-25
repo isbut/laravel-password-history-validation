@@ -16,7 +16,7 @@ return [
      * The models to be observed on and your password column name.
      */
     'observe' => [
-        'model' => \App\Models\User::class,
+        'model' => \App\User::class,
         'column' => 'password',
     ],
 ];
