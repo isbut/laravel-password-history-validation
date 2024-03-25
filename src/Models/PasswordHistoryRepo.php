@@ -17,7 +17,10 @@ class PasswordHistoryRepo
 				PasswordHistory::where('user_id', $user_id)->orderBy('created_at', 'asc')->first()->delete();
 			}
 			// Creación del registro
-			PasswordHistory::create(get_defined_vars());
+			PasswordHistory::create([
+				'password' => $password,
+				'user_id' => $user_id
+			]);
     }
 
     /**
