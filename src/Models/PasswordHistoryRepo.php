@@ -1,6 +1,7 @@
 <?php
 
 namespace Infinitypaul\LaravelPasswordHistoryValidation\Models;
+use App\User;
 
 class PasswordHistoryRepo
 {
@@ -10,7 +11,13 @@ class PasswordHistoryRepo
      */
     public static function storeCurrentPasswordInHistory($password, $user_id)
     {
-        PasswordHistory::create(get_defined_vars());
+			// Borrado historial
+			$num = PasswordHistory::where('user_id', $user_id)->count();
+			if ($num >= config('password-history.keep')) {
+				PasswordHistory::where('user_id', $user_id)->orderBy('created_at', 'asc')->first()->delete();
+			}
+			// Creación del registro
+			PasswordHistory::create(get_defined_vars());
     }
 
     /**
