@@ -11,16 +11,18 @@ class PasswordHistoryRepo
      */
     public static function storeCurrentPasswordInHistory($password, $user_id)
     {
-			// Borrado historial
-			$num = PasswordHistory::where('user_id', $user_id)->count();
-			if ($num >= config('password-history.keep')) {
-				PasswordHistory::where('user_id', $user_id)->orderBy('created_at', 'asc')->first()->delete();
+			if ($password) {
+				// Borrado historial
+				$num = PasswordHistory::where('user_id', $user_id)->count();
+				if ($num >= config('password-history.keep')) {
+					PasswordHistory::where('user_id', $user_id)->orderBy('created_at', 'asc')->first()->delete();
+				}
+				// Creación del registro
+				PasswordHistory::create([
+					'password' => $password,
+					'user_id' => $user_id
+				]);
 			}
-			// Creación del registro
-			PasswordHistory::create([
-				'password' => $password,
-				'user_id' => $user_id
-			]);
     }
 
     /**
